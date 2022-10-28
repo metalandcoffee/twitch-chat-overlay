@@ -19,6 +19,8 @@ const Chat = () => {
 
   // Configuration Options
   const [options, setOptions] = useState(null);
+  // Create reference to options so it can be accessed in event callbacks.
+  const optionsRef = useRef(options);
 
   // Twitch Client
   const client = new tmi.Client({ channels: [channelName] });
@@ -32,14 +34,20 @@ const Chat = () => {
     const query = queryString.parse(window.location.search);
     const options = JSON.parse(Buffer.from(query.options, 'base64').toString());
 
+    // Update both options state and referene.
+    optionsRef.current = options;
     setOptions(options);
   }, [setOptions])
 
   const onMessageReceived = (channel, userstate, message, self) => {
+
     if (self) {
       return;
     }
     
+    // Get options.
+    const options = optionsRef.current;
+
     // Replace Twitch Emotes in message
     let allEmotes = [];
     for (const emote in userstate.emotes) {
